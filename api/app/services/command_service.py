@@ -79,7 +79,7 @@ async def save_result(db: AsyncSession, token: str, data: CommandResult):
     command = result.scalar_one_or_none()
 
     if not command:
-        return False, "Job no encontrado"
+        return False, "Job not found"
 
     # Verificar que el token corresponde al agente dueño del comando
     agent_result = await db.execute(
@@ -91,7 +91,7 @@ async def save_result(db: AsyncSession, token: str, data: CommandResult):
     agent = agent_result.scalar_one_or_none()
 
     if not agent:
-        return False, "Token inválido"
+        return False, "Invalid Token"
 
     # Guardar resultado
     command.status = "completed" if data.exit_code == 0 else "failed"
@@ -109,14 +109,14 @@ async def save_result(db: AsyncSession, token: str, data: CommandResult):
     return True, None
 
 async def get_command_status(db: AsyncSession, job_id: str):
-    """Consulta el estado de un job — para N8N hacer polling"""
+    """Retrieve state of a job — para N8N by polling"""
     result = await db.execute(
         select(Command).where(Command.id == job_id)
     )
     return result.scalar_one_or_none()
 
 async def notify_n8n(command: Command, agent: Agent):
-    """Envía el resultado a N8N via webhook"""
+    """Send result to N8N via webhook"""
     webhook_url = f"{settings.N8N_WEBHOOK_BASE_URL}/webhook/agent-result"
 
     payload = {
@@ -135,4 +135,4 @@ async def notify_n8n(command: Command, agent: Agent):
             await client.post(webhook_url, json=payload, timeout=10)
     except Exception as e:
         # No fallar si N8N no está disponible
-        print(f"Warning: No se pudo notificar a N8N: {e}")
+        print(f"Warning: N8N not available: {e}")
