@@ -3,9 +3,21 @@ from contextlib import asynccontextmanager
 from app.core.vault import load_secrets_from_vault
 import os
 import logging
+from fastapi.middleware.cors import CORSMiddleware
+
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000", "https://*.vercel.app"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
